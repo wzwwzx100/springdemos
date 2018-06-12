@@ -1,0 +1,8 @@
+server:
+  port: 8085
+spring:
+  data:
+    mongodb:
+#      uri: mongodb://maxus_tsp:maxus-1234@10.133.103.16:32992,10.133.103.18:32992,10.133.103.19:32992
+      uri: mongodb://10.128.137.21:27017
+      database: maxus_tsp

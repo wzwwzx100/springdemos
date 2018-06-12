@@ -1,0 +1,54 @@
+
+1、
+mkdir -p /opt/log/mysql
+groupadd mysql
+useradd -r -g mysql -s /bin/false mysql
+#wget http://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.18-linux-glibc2.5-x86_64.tar
+tar xf mysql-5.7.18-linux-glibc2.5-x86_64.tar -C /usr/local
+cd /usr/local
+tar zxf mysql-5.7.18-linux-glibc2.5-x86_64.tar.gz
+cd /usr/local && ln -s mysql-5.7.18-linux-glibc2.5-x86_64 mysql
+cd /usr/local/mysql && mkdir data && chown -R mysql.mysql data
+cd /usr/local/mysql && mkdir logbin && chown -R mysql.mysql logbin
+/usr/local/mysql/bin/mysqld --initialize-insecure --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+rm -f /mysql-5.7.18-linux-glibc2.5-x86_64.tar.gz
+rm -f /mysql-test-5.7.18-linux-glibc2.5-x86_64.tar.gz
+cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
+echo 'export PATH=/usr/local/mysql/bin:$PATH' >> /etc/profile && source /etc/profile
+
+2、修改配置：
+vi /etc/my.cnf
+[mysqld]
+ basedir = /usr/local/mysql
+ datadir = /usr/local/mysql/data
+ log_bin = /usr/local/mysql/logbin/mysql-bin
+ port = 3306
+ character_set_server = utf8
+ explicit_defaults_for_timestamp=true
+ server_id = 1
+ socket=/tmp/mysql.sock
+ slow_query_log = 1
+ long_query_time = 1
+ log_output = 'FILE'
+ slow_query_log_file=/opt/log/mysql/mysql-slow.log
+ log_queries_not_using_indexes = 1
+ lower_case_table_names=1
+ innodb_buffer_pool_size=20M
+ log-error=/opt/log/mysql/mysql-error.log
+ pid-file=/tmp/mysqld.pid
+ log_timestamps=SYSTEM
+ wait_timeout=31536000
+ interactive_timeout=31536000
+ sql_mode=NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+ 
+ 
+3、启动mysql
+mysql --user=mysql &
+
+4、创建用户并设置访问权限
+mysql -uroot
+
+mysql>ALTER USER 'root'@'localhost' IDENTIFIED BY '123456';
+mysql>grant all on *.* to 'root'@'%' identified by '123456';
+
+5、建库

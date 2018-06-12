@@ -1,0 +1,18 @@
+server:
+  port: 8085
+com:
+  mqtt:
+    hosts: 
+      - tcp://10.135.78.20:1883
+      - tcp://10.135.78.23:1883
+      - tcp://10.135.78.54:1883
+    topics: 
+      - topic1
+      - topic2
+      - topic3
+    username: user1
+    password: pass1
+    connectionTimeout: 10
+    completionTimeout: 30000
+    keepalive: 20
+    clientId: mqtt-consumer-111
