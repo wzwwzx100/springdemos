@@ -47,7 +47,7 @@
 		
 	</dependencies>
 	<build>
-		<finalName>mongo</finalName>
+		<finalName>activemq-producer</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

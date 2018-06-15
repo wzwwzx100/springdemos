@@ -1,0 +1,15 @@
+server:
+  port: 8081
+spring:
+  activemq:
+#    broker-url: tcp://10.135.78.20:1883
+    broker-url: failover:(tcp://10.135.78.20:1883,tcp://10.135.78.23:1883,tcp://10.135.78.54:1883)
+#    close-timeout: 5000
+#    send-timeout: 3000
+    in-memory: false
+    pool:
+      enabled: true
+      max-connections: 100
+com:
+  mqtt:
+    queue-name: sample.queue

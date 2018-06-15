@@ -1,0 +1,18 @@
+com:
+  mqtt:
+    hosts: 
+      - tcp://10.135.78.20:1883
+      - tcp://10.135.78.23:1883
+      - tcp://10.135.78.54:1883
+    defaultTopic: defaultTopic
+    async: true
+    username: user1
+    password: pass1
+    connectionTimeout: 10
+    completionTimeout: 30000
+    keepalive: 20
+    clientIdSend: mqtt-client3-send-001
+    clientIdRecive: mqtt-client3-recive-001
+    cleanSession: true
+    topics: 
+      - client/tbox/sn1/#

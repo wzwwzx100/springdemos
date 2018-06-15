@@ -17,6 +17,7 @@
 	<modules>
 		<module>activemq-consumer</module>
 		<module>activemq-producer</module>
+		<module>activemq-spring</module>
 	</modules>
 	
 </project>
