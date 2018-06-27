@@ -1,22 +1,10 @@
-client3ºÍclient4Á½¸öÏîÄ¿ÅäºÏÊ¹ÓÃ£¬×÷ÎªÁ½¸öÏà»¥Í¨Ñ¶µÄclient¡£
-client3ÏòÖ÷Ìâtsp/tbox/#·¢²¼ÏûÏ¢¡£
-client4¶©ÔÄÖ÷Ìâtsp/tbox/#µÄÏûÏ¢¡£
-client4ÊÕµ½Ö÷Ìâtsp/tbox/#µÄÏûÏ¢ºó£¬
-»áËæ»úÏòÒÔÏÂÈı¸öÖ÷ÌâÖĞµÄÒ»¸ö£º
-client/tbox/sn0/aa¡¢client/tbox/sn1/aa¡¢client/tbox/sn2/aa
-·¢²¼ÏûÏ¢¡£
+client3å’Œclient4ä¸¤ä¸ªé¡¹ç›®é…åˆä½¿ç”¨ï¼Œæ¨¡æ‹Ÿè½¦æœºå’Œå¹³å°é—´çš„é€šè®¯è¿‡ç¨‹ã€‚
+client3å‘ä¸»é¢˜tsp/tbox/#å‘å¸ƒæ¶ˆæ¯ã€‚
+client4è®¢é˜…ä¸»é¢˜tsp/tbox/#çš„æ¶ˆæ¯ã€‚
+client4æ”¶åˆ°ä¸»é¢˜tsp/tbox/#çš„æ¶ˆæ¯åï¼Œä¼šéšæœºå‘ä»¥ä¸‹ä¸‰ä¸ªä¸»é¢˜ä¸­çš„ä¸€ä¸ªï¼š
+client/tbox/sn0/aaã€client/tbox/sn1/aaã€client/tbox/sn2/aa
+å‘å¸ƒæ¶ˆæ¯ã€‚
 
-client3»á¶©ÔÄclient/tbox/sn1/aaÖĞµÄÏûÏ¢¡£
+client3ä¼šè®¢é˜…client/tbox/sn1/aaä¸­çš„æ¶ˆæ¯ã€‚
 
-ÕâÁ½¸öÏîÄ¿Ä£ÄâÁË³µ»úºÍÆ½Ì¨¼äµÄÍ¨Ñ¶¹ı³Ì¡£
-
-
-
-
-
-
-
-
-
-
-
+https://docs.spring.io/spring-integration/reference/html/mqtt.html

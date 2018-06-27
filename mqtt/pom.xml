@@ -3,7 +3,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.test.mqtt</groupId>
 	<artifactId>mqtt</artifactId>
-	<version>1.0.0</version>
 	<packaging>pom</packaging>
 	<parent>
 		<groupId>com.test</groupId>
