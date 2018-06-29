@@ -1,0 +1,201 @@
+https://segmentfault.com/a/1190000005079300
+https://www.cnblogs.com/littleatp/p/5878763.html
+https://www.howtoing.com/how-to-install-and-secure-the-mosquitto-mqtt-messaging-broker-on-centos-7/
+http://www.360doc.com/content/15/0610/17/18578054_477193762.shtml
+https://www.wang1314.com/doc/topic-1259214-1.html
+
+1、产生CA的key和证书文件
+openssl req -new -x509 -days 36500 -extensions v3_ca -keyout ca.key -out ca.crt -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.128.147.16" -passout pass:Pass1qaz
+备注：
+req 命令表示创建证书
+new 参数表示创建私钥而不是从已存在的文件中读取
+
+2、生成服务端密钥文件：
+openssl genrsa -out server.key 2048 # -passout pass:Pass1q2w
+
+3、生成服务端的证书请求文件server.csr
+openssl req -out server.csr -key server.key -new -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.135.78.54"
+
+4、生成服务端证书
+将第一步生成的ca证书拷贝过来
+echo "Pass1234" | scp maxus@10.128.147.16:/home/maxus/ssltest/ca.* .
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 36500 -passin pass:Pass1qaz
+
+5、生成客户端密钥文件
+openssl genrsa -out client.key 2048 # -passout pass:Pass1234
+
+6、生成客户端的证书请求文件
+openssl req -out client.csr -key client.key -new -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.135.78.23"
+
+7、生成客户端证书
+将第一步生成的ca证书拷贝过来
+echo "Pass1234" | scp maxus@10.128.147.16:/home/maxus/ssltest/ca.* .
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -days 36500 -passin pass:Pass1qaz
+
+8、转化为pem格式和der格式
+由于java 端不支持client.key的格式，需要命令进行转化
+openssl pkcs8 -topk8 -in client.key -out client.pem -nocrypt
+openssl pkcs8 -topk8 -inform PEM -outform DER -in client.key -out client.der -nocrypt
+
+----------------------------单个代理配置-------------------------------------------------
+sudo vi /etc/mosquitto/mosqquitto.conf
+port 8883
+cafile /home/appuser/ssltest/ca.crt
+certfile /home/appuser/ssltest/server.crt
+keyfile /home/appuser/ssltest/server.key
+
+9、订阅与发布
+mosquitto_sub -h 10.135.78.54 -i 111 -p 8883 -t "topic111" --cafile /home/appuser/ssltest/ca.crt --cert /home/appuser/ssltest/client.crt --key /home/appuser/ssltest/client.key
+
+mosquitto_pub -h 10.135.78.54 -p 8883 -t "topic111" -m "this is w show" --cafile /home/appuser/ssltest/ca.crt --cert /home/appuser/ssltest/client.crt --key /home/appuser/ssltest/client.key
+
+
+----------------------------桥接ssl配置-------------------------------------------------
+主服务器：
+sudo vi /etc/mosquitto/mosqquitto.conf
+port 8883
+bridge_cafile /home/appuser/ssltest/ca.crt
+bridge_certfile /home/appuser/ssltest/server.crt
+bridge_keyfile /home/appuser/ssltest/server.key
+
+address 10.135.78.20:8883
+
+address 10.135.78.23:8883
+
+从服务器：
+sudo vi /etc/mosquitto/mosqquitto.conf
+port 8883
+
+
+附主服务器全量修改配置：
+sudo vi /etc/mosquitto/mosqquitto.conf
+
+user appuser
+
+port 8883
+
+log_dest file /var/log/mosquitto.log
+
+log_type error
+log_type warning
+log_type notice
+log_type information
+log_type debug
+
+log_timestamp true
+
+connection mytest1
+address 10.135.78.20:8883
+topic tbox/# both 2 local/ remote/
+
+connection mytest2
+address 10.135.78.23:8883
+topic tbox/# both 2 local/ remote/
+
+bridge_protocol_version mqttv311
+
+notifications true
+
+cleansession true
+
+try_private true
+
+start_type automatic
+
+round_robin true
+
+bridge_cafile /home/appuser/ssltest/ca.crt
+bridge_certfile /home/appuser/ssltest/server.crt
+bridge_keyfile /home/appuser/ssltest/server.key
+
+附从服务器全量修改配置：
+sudo vi /etc/mosquitto/mosqquitto.conf
+
+user appuser
+
+port 8883
+
+log_dest file /var/log/mosquitto.log
+
+log_type error
+log_type warning
+log_type notice
+log_type information
+log_type debug
+
+log_timestamp true
+
+
+--------------------java访问--------------------
+[error] Server access Error: sun.security.validator.ValidatorException:
+PKIX path building failed:sun.security.provider.certpath.SunCertPathBuilderException:unable to find valid certification path to requested target
+
+该错误是因为没有可信任的证书，解决方案：
+导入ca证书到信任库：
+windows：
+keytool -importcert -keystore "D:\Java\jdk1.8.0_131\jre\lib\security\cacerts" -storepass changeit -alias mqttca -file d:/opt/ssl/ca.crt
+cenotos7：
+sudo keytool -importcert -keystore /etc/pki/java/cacerts -storepass changeit -alias mqttca -file /opt/ssl/ca.crt
+
+附：
+删除证书：
+windows:
+keytool -delete -alias mqttca -keystore "D:\Java\jdk1.8.0_131\jre\lib\security\cacerts" -storepass changeit
+cento7:
+sudo keytool -delete -alias mqttca -keystore /etc/pki/java/cacerts -storepass changeit
+
+查看证书：
+windows:
+keytool -list -keystore "D:\Java\jdk1.8.0_131\jre\lib\security\cacerts" -storepass changeit
+centos7:
+sudo keytool -list -keystore /etc/pki/java/cacerts -storepass changeit
+
+
+-------------------------证书签名完整过程-------------------------------------
+一、生成CA的自签名证书
+1、在10.128.147.16下（centos7）下生成
+openssl req -new -x509 -days 36500 -extensions v3_ca -keyout ~/ssl/ca/ca.key -out ~/ssl/ca/ca.crt -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.128.147.16" -nodes #-passout pass:Pass1qaz
+备注：
+req        表示创建证书
+new        表示创建私钥而不是从文件读取
+nodes      表示不加密私钥
+passout    表示加密私钥，和nodes矛盾，两参数只能选一个
+extensions 指定证书的扩展选项
+
+二、生成客户端证书
+1)生成KeyPair密钥对
+keytool -genkeypair -alias client -validity 365 -keyalg RSA -keysize 2048 -keypass changeit -storepass changeit -keystore D:\Java\jdk1.8.0_131\jre\lib\security\client.keystore -dname "C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.135.78.23"
+
+2)生成证书签名请求
+keytool -certreq -alias client -sigalg MD5withRSA -file d:/test/ssl/23/client.csr -keypass changeit -storepass changeit -keystore D:\Java\jdk1.8.0_131\jre\lib\security\client.keystore
+
+三、使用CA签发证书
+将证书签名请求文件拷贝到10.128.147.16上
+openssl x509 -req -in ~/ssl/23/client.csr -CA ~/ssl/ca/ca.crt -CAkey ~/ssl/ca/ca.key -CAcreateserial -out ~/ssl/23/client.crt -days 3650
+
+四、导入证书
+将ca证书和其签发的客户端证书拷贝到客户端（windows）下
+1、导入CA证书到受信任的keystore
+keytool -importcert -v -trustcacerts -alias ca_root -file D:\test\ssl\ca\ca.crt -storepass changeit -keystore D:\Java\jdk1.8.0_131\jre\lib\security\client.keystore
+
+2、导入客户端证书到受信任的keystore
+keytool -importcert -v -alias client -file d:/test/ssl/23/client.crt -storepass changeit -keystore D:\Java\jdk1.8.0_131\jre\lib\security\client.keystore
+注：
+1、keystore必须和客户端生成密钥对的是同一个，因为私钥还在那个keystore中。
+2、别名必须和客户端生成密钥对时保持一致，否则无法判断这个导入的和先前的私钥是一对。
+可参考：https://blog.csdn.net/fengwind1/article/details/52191520
+
+五、查看证书
+keytool -list -v -keystore D:\Java\jdk1.8.0_131\jre\lib\security\client.keystore -storepass changeit
+
+六、删除证书：
+keytool -delete -alias clientcert -keystore D:\Java\jdk1.8.0_131\jre\lib\security\client.keystore -storepass changeit
+
+
+
+
+
+
+
+
+
