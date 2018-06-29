@@ -1,0 +1,60 @@
+安装节点：
+10.135.78.23
+10.135.78.20
+10.135.78.54
+sudo yum install -y lksctp-tools
+
+wget http://emqtt.com/static/brokers/emqttd-centos7-v2.3.9-1.el7.centos.x86_64.rpm
+sudo rpm -ivh emqttd-centos7-v2.3.9-1.el7.centos.x86_64.rpm
+
+sudo vi /etc/emqttd/emq.conf
+node.name=emq@10.135.78.20
+
+sudo systemctl daemon-reload
+sudo systemctl enable emqttd
+sudo systemctl start emqttd
+
+节点加入集群：
+在10.135.78.20和10.135.78.54上执行（10.135.78.23是第一个启动的节点）
+emqttd_ctl cluster join emq@10.135.78.23
+
+查看集群状态：
+emqttd_ctl cluster status
+-[appuser@sqsyc-maxus-se-distribute-vm-dfd55af6 sbin]$ emqttd_ctl cluster status
+Cluster status: [{running_nodes,['emq@10.135.78.23','emq@10.135.78.20',
+                                 'emq@10.135.78.54']}]
+
+节点退出集群：
+1、节点主动退出：
+在想退出的节点上执行：
+emqttd_ctl cluster leave
+
+2、集群删除节点：
+在要被删除的节点以外的任意一个节点上执行：
+emqttd_ctl cluster force-leave emq@10.135.78.20
+
+日志查看：
+日志保存在：/var/log/emqttd目录下面
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,65 @@
+sudo yum groupinstall -y "Development Tools"
+sudo yum install -y openssl openssl-devel
+sudo tar zxf haproxy-1.7.9.tar.gz -C /usr/local/src
+cd /usr/local/src/haproxy-1.7.9
+sudo make TARGET=linux2628 USE_OPENSSL=1 ADDLIB=-lz
+sudo make install PREFIX=/usr/local/haproxy
+
+sudo groupadd -r haproxy
+sudo useradd -r -g haproxy -s /sbin/nologin haproxy
+sudo mkdir -pv /etc/haproxy
+sudo touch /var/log/haproxy.log
+sudo chmod a+w /var/log/haproxy.log
+
+sudo vi /etc/sysconfig/rsyslog
+SYSLOGD_OPTIONS="-r -m 0 -c 2"
+备注:
+ #-c 2 使用兼容模式，默认是 -c 5
+ #-r 开启远程日志
+ #-m 0 标记时间戳。单位是分钟，为0时，表示禁用该功能
+ 
+sudo vi /etc/rsyslog.conf
+# Provides TCP syslog reception
+$ModLoad imudp
+$UDPServerRun 514
+
+# Save haproxy log
+local3.*                                                /var/log/haproxy.log
+
+sudo systemctl restart rsyslog
+
+sudo vi /etc/haproxy/haproxy.cfg 
+global
+    maxconn 51200
+    chroot /usr/local/haproxy
+    user haproxy
+    group haproxy
+    nbproc 1
+    pidfile /var/run/haproxy.pid
+    tune.ssl.default-dh-param 2048
+
+defaults
+    log global
+    option httplog
+    log 127.0.0.1 local3
+    mode http
+    balance roundrobin
+    timeout server 86400000
+    timeout connect 86400000
+    timeout client 86400000
+    timeout queue 1000s
+
+listen emq_cluster
+    mode tcp
+    option tcplog
+    bind 0.0.0.0:8888 ssl crt /opt/ssl/allinone.pem
+    server emq-1 10.135.78.20:1883 weight 1 maxconn 1500 inter 2000 check
+    server emq-2 10.135.78.23:1883 weight 1 maxconn 1500 inter 2000 check
+    server emq-3 10.135.78.54:1883 weight 1 maxconn 1500 inter 2000 check
+
+
+
+
+
+
+

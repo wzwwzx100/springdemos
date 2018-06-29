@@ -1,0 +1,22 @@
+com:
+  mqtt:
+    hosts: 
+#      - tcp://10.135.78.20:1883
+#      - tcp://10.135.78.23:1883
+#      - tcp://10.135.78.54:1883
+      - ssl://10.135.78.20:8888
+    topics: 
+      - tsp/tbox/#
+    username: user1
+    password: pass1
+    connectionTimeout: 10
+    completionTimeout: 30000
+    keepalive: 20
+    clientIdSend: emqtt-client2-send-001
+    clientIdRecive: emqtt-client2-recive-001
+    defaultTopic: defaultTopic
+    async: true
+    cleanSession: true
+    caCertificate: /opt/ssl/23/ca.crt
+    certificate: /opt/ssl/23/client.crt
+    privateKey: /opt/ssl/23/client.der
