@@ -17,6 +17,6 @@ com:
     defaultTopic: defaultTopic
     async: true
     cleanSession: true
-    caCertificate: /opt/ssl/23/ca.crt
+    caCertificate: /opt/ssl/ca/ca.crt
     certificate: /opt/ssl/23/client.crt
     privateKey: /opt/ssl/23/client.der
