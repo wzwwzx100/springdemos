@@ -16,7 +16,7 @@ com:
     clientIdRecive: mqtt-client3-recive-00111
     cleanSession: true
     topics: 
-      - client/tbox/sn1/#
+      - 1.0/+/GW
     caCertificate: /opt/ssl/ca/ca.crt
     certificate: /opt/ssl/23/client.crt
     privateKey: /opt/ssl/23/client.der

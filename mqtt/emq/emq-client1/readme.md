@@ -12,7 +12,7 @@ PKIX path building failed:sun.security.provider.certpath.SunCertPathBuilderExcep
 
 该错误是因为没有可信任的证书，解决方案：
 导入ca证书到信任库：
-keytool -importcert -keystore "D:\Java\jdk1.8.0_131\jre\lib\security\cacerts" -storepass changeit -alias mqttca -file d:/opt/ssl/ca.crt
+keytool -importcert -keystore "D:\Java\jdk1.8.0_131\jre\lib\security\cacerts" -storepass changeit -alias mqttca -file d:/opt/ssl/ca/ca.crt
 sudo keytool -importcert -keystore /etc/pki/java/cacerts -storepass changeit -alias mqttca -file /opt/ssl/ca.crt
 
 

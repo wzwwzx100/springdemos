@@ -1,9 +1,5 @@
 package com.test.mqtt.emq.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +18,9 @@ public class ProducerController {
 	
 	@RequestMapping("/send")
 	public void send(String topic, String msg) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		String payload = "foo-" + df.format(new Date());
-		String message = "topic: " + topic + ", payload: " + payload;
+		String message = "topic: " + topic + ", payload: " + msg;
 		System.out.println(message);
 		logger.info(message);
-		gateway.sendToMqtt(payload, topic);
+		gateway.sendToMqtt(msg, topic);
 	}
 }

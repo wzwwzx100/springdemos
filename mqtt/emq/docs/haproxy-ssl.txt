@@ -13,10 +13,10 @@ sudo chmod a+w /var/log/haproxy.log
 
 sudo vi /etc/sysconfig/rsyslog
 SYSLOGD_OPTIONS="-r -m 0 -c 2"
-��ע:
- #-c 2 ʹ�ü���ģʽ��Ĭ���� -c 5
- #-r ����Զ����־
- #-m 0 ���ʱ�������λ�Ƿ��ӣ�Ϊ0ʱ����ʾ���øù���
+备注:
+ #-c 2 使用兼容模式，默认是 -c 5
+ #-r 开启远程日志
+ #-m 0 标记时间戳。单位是分钟，为0时，表示禁用该功能
  
 sudo vi /etc/rsyslog.conf
 # Provides TCP syslog reception
@@ -27,6 +27,9 @@ $UDPServerRun 514
 local3.*                                                /var/log/haproxy.log
 
 sudo systemctl restart rsyslog
+
+
+cat server.key server.crt ca.crt | tee allinone.pem
 
 sudo vi /etc/haproxy/haproxy.cfg 
 global
@@ -57,9 +60,104 @@ listen emq_cluster
     server emq-2 10.135.78.23:1883 weight 1 maxconn 1500 inter 2000 check
     server emq-3 10.135.78.54:1883 weight 1 maxconn 1500 inter 2000 check
 
+sudo /usr/local/haproxy/sbin/haproxy -f /etc/haproxy/haproxy.cfg &
 
 
+----------------------------------------------------------------------------------------------------
+说明：
+emq服务器：
+10.135.78.20
+10.135.78.23
+10.135.78.54
+emq集群前端haproxy：
+10.135.78.20:8888
+采用的架构是：在haproxy上配置ssl，haproxy向emq转发不用ssl。
 
+-------------------------------ssl配置步骤-------------------------------------
+-------------------------------生成CA证书和密钥----------------------------------
+1、在10.128.147.16生成CA证书和私钥
+openssl req -new -x509 -days 36500 -extensions v3_ca -keyout ~/ssl/ca/ca.key -out ~/ssl/ca/ca.crt -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.128.147.16" -passout pass:changeit #-nodes
+备注：
+req        表示创建证书
+new        表示创建私钥而不是从文件读取
+nodes      表示不加密私钥
+passout    表示加密私钥，和nodes矛盾，两参数只能选一个
+extensions 指定证书的扩展选项
+
+-------------------------------服务端haproxy配置----------------------------------
+2、生成服务端（haproxy）私钥：
+openssl genrsa -out server.key 2048 -passout pass:changeit
+
+3、生成服务端的证书请求文件server.csr
+openssl req -out server.csr -key server.key -new -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.135.78.20"
+
+4、生成服务端证书
+将第一步生成的ca证书拷贝过来
+echo "Pass1234" | scp maxus@10.128.147.16:/home/maxus/ssl/ca/ca.* .
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 36500 -passin pass:changeit
+
+5、将私钥、证书和ca证书合并为一个pem文件：
+cat server.key server.crt ca.crt | tee allinone.pem
+
+6、将合并后的证书配置到haproxy中：
+mkdir -p /opt/ssl
+cp ~/ssl/allinone.pem /opt/ssl
+vi /etc/haproxy/haproxy.cfg
+global
+    maxconn 51200
+    chroot /usr/local/haproxy
+    user haproxy
+    group haproxy
+    nbproc 1
+    pidfile /var/run/haproxy.pid
+    tune.ssl.default-dh-param 2048
+
+defaults
+    log global
+    option httplog
+    log 127.0.0.1 local3
+    mode http
+    balance roundrobin
+    timeout server 86400000
+    timeout connect 86400000
+    timeout client 86400000
+    timeout queue 1000s
+    
+listen emq_cluster
+    mode tcp
+    option tcplog
+    bind 0.0.0.0:8888 ssl crt /opt/ssl/allinone.pem
+    server emq-1 10.135.78.20:1883 weight 1 maxconn 1500 inter 2000 check
+    server emq-2 10.135.78.23:1883 weight 1 maxconn 1500 inter 2000 check
+    server emq-3 10.135.78.54:1883 weight 1 maxconn 1500 inter 2000 check
+
+启动haproxy：
+sudo /usr/local/haproxy/sbin/haproxy -f /etc/haproxy/haproxy.cfg &
+
+-------------------------------客户端SSL配置----------------------------------
+7、生成客户端密钥文件（在10.135.78.23上）
+cd ~/ssl
+openssl genrsa -out client.key 2048 -passout pass:changeit
+
+8、生成客户端的证书请求文件
+openssl req -out client.csr -key client.key -new -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.135.78.23"
+
+9、生成客户端证书
+将第一步生成的ca证书拷贝过来
+echo "Pass1234" | scp maxus@10.128.147.16:/home/maxus/ssl/ca/ca.* .
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -days 36500 -passin pass:changeit
+
+10、转化为pem格式和der格式
+由于java 端不支持client.key的格式，需要命令进行转化
+openssl pkcs8 -topk8 -in client.key -out client.pem -nocrypt
+openssl pkcs8 -topk8 -inform PEM -outform DER -in client.key -out client.der -nocrypt
+
+11、将ca证书导入默认信任证书库：
+将ca.crt拷贝到windows的d:/opt/ssl/ca目录下：
+echo y | keytool -importcert -keystore D:\Java\jdk1.8.0_131\jre\lib\security\cacerts -storepass changeit -alias ca_root -file d:/opt/ssl/ca/ca.crt
+
+12、查看D:\Java\jdk1.8.0_131\jre\lib\security\cacerts里的证书：
+keytool -list -v -keystore D:\Java\jdk1.8.0_131\jre\lib\security\cacerts -storepass changeit
 
 
 

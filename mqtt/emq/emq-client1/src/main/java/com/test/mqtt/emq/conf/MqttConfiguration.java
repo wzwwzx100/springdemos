@@ -41,8 +41,9 @@ public class MqttConfiguration {
 
 	@Bean
 	public MessageProducer inbound() {
+		String clientId = mqttProperties.getClientIdRecive() + System.currentTimeMillis();
 		MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-		        mqttProperties.getHosts()[0], mqttProperties.getClientIdRecive(), mqttProperties.getTopics());
+		        mqttProperties.getHosts()[0], clientId, mqttProperties.getTopics());
 		adapter.setCompletionTimeout(mqttProperties.getCompletionTimeout());
 		adapter.setConverter(new DefaultPahoMessageConverter());
 		adapter.setQos(1);
@@ -71,7 +72,7 @@ public class MqttConfiguration {
 
 		MqttConnectOptions options = new MqttConnectOptions();
 
-		SSLSocketFactory factory = SslUtil.getSocketFactory(mqttProperties.getCaCertificate(), mqttProperties.getCertificate(), mqttProperties.getPrivateKey(), "");
+		SSLSocketFactory factory = SslUtil.getSocketFactory(mqttProperties.getCaCertificate(), mqttProperties.getCertificate(), mqttProperties.getPrivateKey(), "changeit");
 		
 		options.setSocketFactory(factory);
 		
@@ -93,7 +94,8 @@ public class MqttConfiguration {
 	@Bean
 	@ServiceActivator(inputChannel = "mqttOutboundChannel")
 	public MessageHandler mqttOutbound() throws Exception {
-		MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(mqttProperties.getClientIdSend(),
+		String clientId= mqttProperties.getCaCertificate() + System.currentTimeMillis();
+		MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(clientId,
 		        clientFactory());
 		messageHandler.setAsync(mqttProperties.isAsync());
 		messageHandler.setDefaultTopic(mqttProperties.getDefaultTopic());

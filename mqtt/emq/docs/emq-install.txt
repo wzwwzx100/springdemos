@@ -1,7 +1,8 @@
 安装节点：
-10.135.78.23
+10.135.78.23（第一个启动的节点）
 10.135.78.20
 10.135.78.54
+
 sudo yum install -y lksctp-tools
 
 wget http://emqtt.com/static/brokers/emqttd-centos7-v2.3.9-1.el7.centos.x86_64.rpm
