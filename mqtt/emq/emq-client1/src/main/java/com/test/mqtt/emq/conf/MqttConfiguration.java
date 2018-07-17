@@ -2,6 +2,8 @@ package com.test.mqtt.emq.conf;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,6 +31,8 @@ import com.test.mqtt.emq.util.SslUtil;
 @Configuration
 @EnableConfigurationProperties(MqttProperties.class)
 public class MqttConfiguration {
+	
+	private static Logger logger = LogManager.getLogger(MqttConfiguration.class);
 
 	@Autowired
 	private MqttProperties mqttProperties;
@@ -43,7 +47,7 @@ public class MqttConfiguration {
 	public MessageProducer inbound() {
 		String clientId = mqttProperties.getClientIdRecive() + System.currentTimeMillis();
 		MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-		        mqttProperties.getHosts()[0], clientId, mqttProperties.getTopics());
+		        mqttProperties.getHosts()[0], clientId, mqttProperties.getReciveTopics());
 		adapter.setCompletionTimeout(mqttProperties.getCompletionTimeout());
 		adapter.setConverter(new DefaultPahoMessageConverter());
 		adapter.setQos(1);
@@ -59,20 +63,19 @@ public class MqttConfiguration {
 			public void handleMessage(Message<?> message) throws MessagingException {
 				MessageHeaders headers = message.getHeaders();
 				String topic = (String) headers.get("mqtt_receivedTopic");
-				System.out.println("topic: " + topic + ", payload: " + message.getPayload());
+				logger.info("listen topic: " + topic + ", payload: " + message.getPayload());
 			}
 		};
 	}
 
 	// ----------------------output------------------------------------
-
 	@Bean
 	public MqttPahoClientFactory clientFactory() throws Exception {
 		DefaultMqttPahoClientFactory clientFactory = new DefaultMqttPahoClientFactory();
 
 		MqttConnectOptions options = new MqttConnectOptions();
 
-		SSLSocketFactory factory = SslUtil.getSocketFactory(mqttProperties.getCaCertificate(), mqttProperties.getCertificate(), mqttProperties.getPrivateKey(), "changeit");
+		SSLSocketFactory factory = SslUtil.getSocketFactory(mqttProperties.getCaCertificate(), mqttProperties.getCertificate(), mqttProperties.getPrivateKey(), mqttProperties.getKeyPass());
 		
 		options.setSocketFactory(factory);
 		
@@ -87,6 +90,9 @@ public class MqttConfiguration {
 		options.setConnectionTimeout(mqttProperties.getConnectionTimeout());
 		// 设置会话心跳时间 单位为秒 服务器会每隔1.5*20秒的时间向客户端发送个消息判断客户端是否在线，但这个方法并没有重连的机制
 		options.setKeepAliveInterval(mqttProperties.getKeepalive());
+		//设置遗嘱消息
+		options.setWill("willTopic", "I'm offline.".getBytes("utf-8"), 2, false);
+		
 		clientFactory.setConnectionOptions(options);
 		return clientFactory;
 	}
@@ -109,7 +115,7 @@ public class MqttConfiguration {
 
 	@MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
 	public interface MyGateway {
-		void sendToMqtt(String payload, @Header(MqttHeaders.TOPIC) String topic);
+		void sendToMqtt(String payload, @Header(name=MqttHeaders.TOPIC) String topic);
 	}
 
 }

@@ -4,8 +4,9 @@ https://www.wang1314.com/doc/topic-1259214-1.html
 https://www.ibm.com/support/knowledgecenter/zh/SSFKSJ_7.0.1/com.ibm.mq.amqtat.doc/tt60319_.htm
 http://houjixin.blog.163.com/blog/static/3562841020155110107215/
 https://blog.csdn.net/yezis/article/details/43644117
-
-
+https://blog.toright.com/posts/4024/haproxy-%E6%95%B4%E5%90%88-ssltls-client-certificate-%E6%95%99%E5%AD%B8.html
+https://blog.csdn.net/chengfei112233/article/details/78983026
+http://www.cnblogs.com/lexiaofei/p/8398065.html
 
 [error] Server access Error: sun.security.validator.ValidatorException:
 PKIX path building failed:sun.security.provider.certpath.SunCertPathBuilderException:unable to find valid certification path to requested target

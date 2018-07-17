@@ -62,11 +62,11 @@ public class MqttConfiguration {
 				MessageHeaders headers = message.getHeaders();
 				String topic = (String) headers.get("mqtt_receivedTopic");
 				System.out.println("topic: " + topic + ", payload: " + message.getPayload());
-				long i = System.currentTimeMillis() % 3;
-				String replyTopic = "client/tbox/sn" + i + "/aa";
-				String msg = "This is a response: " + message.getPayload();
-				System.out.println("reply topic::: " + replyTopic + ", reply message: " + msg);
-				myGateway.sendToMqtt(msg, replyTopic);
+//				long i = System.currentTimeMillis() % 3;
+//				String replyTopic = "client/tbox/sn" + i + "/aa";
+//				String msg = "This is a response: " + message.getPayload();
+//				System.out.println("reply topic::: " + replyTopic + ", reply message: " + msg);
+//				myGateway.sendToMqtt(msg, replyTopic);
 			}
 		};
 	}

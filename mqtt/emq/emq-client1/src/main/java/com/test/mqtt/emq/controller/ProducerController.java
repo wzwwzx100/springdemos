@@ -18,7 +18,7 @@ public class ProducerController {
 	
 	@RequestMapping("/send")
 	public void send(String topic, String msg) {
-		String message = "topic: " + topic + ", payload: " + msg;
+		String message = "send topic: " + topic + ", payload: " + msg;
 		System.out.println(message);
 		logger.info(message);
 		gateway.sendToMqtt(msg, topic);

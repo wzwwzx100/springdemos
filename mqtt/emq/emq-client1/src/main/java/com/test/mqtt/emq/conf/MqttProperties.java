@@ -27,13 +27,17 @@ public class MqttProperties {
 	
 	private int completionTimeout;
 	
-	private String[] topics;
+	private String[] sendTopics;
+	
+	private String[] reciveTopics;
 	
 	private String caCertificate;
 	
 	private String certificate;
 	
 	private String privateKey;
+	
+	private String keyPass;
 
 	public String[] getHosts() {
 		return hosts;
@@ -123,12 +127,20 @@ public class MqttProperties {
 		this.completionTimeout = completionTimeout;
 	}
 
-	public String[] getTopics() {
-		return topics;
+	public String[] getSendTopics() {
+		return sendTopics;
 	}
 
-	public void setTopics(String[] topics) {
-		this.topics = topics;
+	public void setSendTopics(String[] sendTopics) {
+		this.sendTopics = sendTopics;
+	}
+
+	public String[] getReciveTopics() {
+		return reciveTopics;
+	}
+
+	public void setReciveTopics(String[] reciveTopics) {
+		this.reciveTopics = reciveTopics;
 	}
 
 	public String getCaCertificate() {
@@ -153,6 +165,14 @@ public class MqttProperties {
 
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
+	}
+
+	public String getKeyPass() {
+		return keyPass;
+	}
+
+	public void setKeyPass(String keyPass) {
+		this.keyPass = keyPass;
 	}
 
 }

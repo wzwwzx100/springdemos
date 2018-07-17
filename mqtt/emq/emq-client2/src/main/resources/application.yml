@@ -6,7 +6,7 @@ com:
 #      - tcp://10.135.78.54:1883
       - ssl://10.135.78.20:8888
     topics: 
-      - tsp/tbox/#
+      - +/GW/#
     username: user1
     password: pass1
     connectionTimeout: 10

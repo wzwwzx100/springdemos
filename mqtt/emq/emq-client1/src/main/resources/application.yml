@@ -5,6 +5,7 @@ com:
 #      - tcp://10.135.78.23:1883
 #      - tcp://10.135.78.54:1883
       - ssl://10.135.78.20:8888
+#      - ssl://36.152.36.24:8888
     defaultTopic: defaultTopic
     async: true
     username: user1
@@ -15,9 +16,13 @@ com:
     clientIdSend: mqtt-client3-send-001
     clientIdRecive: mqtt-client3-recive-00111
     cleanSession: true
-    topics: 
+    sendTopics: 
       - 1.0/+/GW
+      - willTopic
+    reciveTopics:
+      - 1.0/GW/+
     caCertificate: /opt/ssl/ca/ca.crt
     certificate: /opt/ssl/23/client.crt
     privateKey: /opt/ssl/23/client.der
+    keyPass: changeit
       

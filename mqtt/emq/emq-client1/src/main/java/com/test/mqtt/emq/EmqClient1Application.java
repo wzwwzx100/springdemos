@@ -7,10 +7,10 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 
 @SpringBootApplication
 @IntegrationComponentScan
-public class MqttClient1Application {
+public class EmqClient1Application {
 
 	public static void main(String[] args) {
-		new SpringApplicationBuilder(MqttClient1Application.class).web(
+		new SpringApplicationBuilder(EmqClient1Application.class).web(
 		        WebApplicationType.SERVLET).run(args);
 	}
 
