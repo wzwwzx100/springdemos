@@ -20,3 +20,10 @@ com:
     caCertificate: /opt/ssl/ca/ca.crt
     certificate: /opt/ssl/23/client.crt
     privateKey: /opt/ssl/23/client.der
+    protocol: TLSv1.2
+    keyStore: /opt/ssl/test/client.jks
+    keyStorePassword: changeit
+    keyStoreType: JKS
+    trustStore: /opt/ssl/test/client-trust.jks
+    trustStorePassword: changeit
+    trustStoreType: JKS

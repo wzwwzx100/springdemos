@@ -1,8 +1,11 @@
 package com.test.mqtt.emq.conf;
 
+import java.util.Properties;
+
 import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -43,9 +46,9 @@ public class MqttConfiguration {
 	}
 
 	@Bean
-	public MessageProducer inbound() {
+	public MessageProducer inbound() throws Exception {
 		MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-		        mqttProperties.getHosts()[0], mqttProperties.getClientIdRecive(), mqttProperties.getTopics());
+		         mqttProperties.getClientIdRecive(), clientFactory(), mqttProperties.getTopics());
 		adapter.setCompletionTimeout(mqttProperties.getCompletionTimeout());
 		adapter.setConverter(new DefaultPahoMessageConverter());
 		adapter.setQos(1);
@@ -61,7 +64,7 @@ public class MqttConfiguration {
 			public void handleMessage(Message<?> message) throws MessagingException {
 				MessageHeaders headers = message.getHeaders();
 				String topic = (String) headers.get("mqtt_receivedTopic");
-				System.out.println("topic: " + topic + ", payload: " + message.getPayload());
+				System.out.println("listen topic: " + topic + ", payload: " + message.getPayload());
 //				long i = System.currentTimeMillis() % 3;
 //				String replyTopic = "client/tbox/sn" + i + "/aa";
 //				String msg = "This is a response: " + message.getPayload();
@@ -78,9 +81,19 @@ public class MqttConfiguration {
 		DefaultMqttPahoClientFactory clientFactory = new DefaultMqttPahoClientFactory();
 		MqttConnectOptions options = new MqttConnectOptions();
 		
-		SSLSocketFactory factory = SslUtil.getSocketFactory(mqttProperties.getCaCertificate(), mqttProperties.getCertificate(), mqttProperties.getPrivateKey(), "");
+//		SSLSocketFactory factory = SslUtil.getSocketFactory(mqttProperties.getCaCertificate(), mqttProperties.getCertificate(), mqttProperties.getPrivateKey(), "");
+//		
+//		options.setSocketFactory(factory);
 		
-		options.setSocketFactory(factory);
+		Properties sslClientProps = new Properties();
+		sslClientProps.setProperty(SSLSocketFactoryFactory.SSLPROTOCOL, mqttProperties.getProtocol());
+		sslClientProps.setProperty(SSLSocketFactoryFactory.KEYSTORE, mqttProperties.getKeyStore());
+		sslClientProps.setProperty(SSLSocketFactoryFactory.KEYSTOREPWD, mqttProperties.getKeyStorePassword());
+		sslClientProps.setProperty(SSLSocketFactoryFactory.KEYSTORETYPE, mqttProperties.getKeyStoreType());
+		sslClientProps.setProperty(SSLSocketFactoryFactory.TRUSTSTORE, mqttProperties.getTrustStore());
+		sslClientProps.setProperty(SSLSocketFactoryFactory.TRUSTSTOREPWD, mqttProperties.getTrustStorePassword());
+		sslClientProps.setProperty(SSLSocketFactoryFactory.TRUSTSTORETYPE, mqttProperties.getTrustStoreType());
+		options.setSSLProperties(sslClientProps);
 		
 		options.setServerURIs(mqttProperties.getHosts());
 		// 设置是否清空session,这里如果设置为false表示服务器会保留客户端的连接记录，这里设置为true表示每次连接到服务器都以新的身份连接

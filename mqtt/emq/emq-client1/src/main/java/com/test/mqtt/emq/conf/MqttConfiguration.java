@@ -61,6 +61,7 @@ public class MqttConfiguration {
 			@Override
 			public void handleMessage(Message<?> message) throws MessagingException {
 				MessageHeaders headers = message.getHeaders();
+				headers.forEach((x,y) ->logger.info("header::: " + x + ":" + headers.get(y)));
 				String topic = (String) headers.get("mqtt_receivedTopic");
 				logger.info("listen topic: " + topic + ", payload: " + message.getPayload());
 			}
