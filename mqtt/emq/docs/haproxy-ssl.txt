@@ -150,7 +150,7 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out c
 10、转化为pem格式和der格式
 由于java 端不支持client.key的格式，需要命令进行转化
 openssl pkcs8 -topk8 -in client.key -out client.pem -nocrypt
-openssl pkcs8 -topk8 -inform PEM -outform DER -in client.key -out client.der -nocrypt
+openssl pkcs8 -topk8 -inform PEM -outform DER -in client.key -out client.der -passin pass:changeit -passout pass:changeit
 
 11、将ca证书导入默认信任证书库：
 将ca.crt拷贝到windows的d:/opt/ssl/ca目录下：

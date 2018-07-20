@@ -1,4 +1,6 @@
-package com.test.mqtt.emq.util;
+package com.test.mqtt.emq;
+
+import java.util.Properties;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -7,13 +9,16 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import com.test.mqtt.emq.util.PushCallback;
+import com.test.mqtt.emq.util.SslUtil;
+
 public class ListenMqtt {
 
 	public static final String HOST = "ssl://10.135.78.20:8888";
 
-	public static final String TOPIC1 = "1.0/aaa/GW";
+	public static final String TOPIC1 = "1.0/GW/ a20170605120000";
 
-	public static final String clientid = "client11";
+	public static final String clientid = "client11" + System.currentTimeMillis();
 
 	private MqttClient client;
 
@@ -27,10 +32,26 @@ public class ListenMqtt {
 		try {
 			client = new MqttClient(HOST, clientid, new MemoryPersistence());
 			options = new MqttConnectOptions();
-			SSLSocketFactory factory = SslUtil.getSocketFactory("d:/opt/ssl/ca/ca.crt", "d:/opt/ssl/23/client.crt",
-			        "d:/opt/ssl/23/client.der", "changeit");
+			String path = "/opt/ssl/test/";
 			
-			options.setSocketFactory(factory);
+			
+//			SSLSocketFactory factory = SslUtil.getSocketFactory(path + "ca.crt", path + "client.crt",
+//			        path + "client.der", "changeit");
+//			options.setSocketFactory(factory);
+			
+			
+			Properties sslClientProps = new Properties();
+			sslClientProps.setProperty("com.ibm.ssl.protocol", "TLSv1.2");
+			String keyStore = path + "client.jks";
+			sslClientProps.setProperty("com.ibm.ssl.keyStore", keyStore);
+			sslClientProps.setProperty("com.ibm.ssl.keyStorePassword", "changeit");
+			sslClientProps.setProperty("com.ibm.ssl.keyStoreType", "JKS");
+			String trustStore = path + "client-trust.jks";
+			sslClientProps.setProperty("com.ibm.ssl.trustStore", trustStore);
+			sslClientProps.setProperty("com.ibm.ssl.trustStorePassword", "changeit");
+			sslClientProps.setProperty("com.ibm.ssl.trustStoreType", "JKS");
+			options.setSSLProperties(sslClientProps);
+			
 			
 			options.setCleanSession(false);
 			options.setUserName(userName);

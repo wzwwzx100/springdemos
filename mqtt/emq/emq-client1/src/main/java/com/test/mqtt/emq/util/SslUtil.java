@@ -3,16 +3,23 @@ package com.test.mqtt.emq.util;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -25,7 +32,7 @@ import org.apache.commons.codec.binary.Base64;
 public class SslUtil {
 
 	public static SSLSocketFactory getSocketFactory(final String caCrtFile, final String crtFile, final String keyFile,
-	        final String password) throws Exception {
+	        final String password) throws IOException, CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, KeyStoreException, UnrecoverableKeyException, KeyManagementException {
 
 		// load CA certificate
 		ByteArrayInputStream bin = new ByteArrayInputStream(Files.readAllBytes(Paths.get(caCrtFile)));
@@ -61,7 +68,7 @@ public class SslUtil {
 
 		// finally, create SSL socket factory
 		SSLContext context = SSLContext.getInstance("TLSv1.2");
-		context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+		context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 		return context.getSocketFactory();
 	}
 

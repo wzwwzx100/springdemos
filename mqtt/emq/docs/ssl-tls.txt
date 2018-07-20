@@ -4,8 +4,10 @@ https://www.howtoing.com/how-to-install-and-secure-the-mosquitto-mqtt-messaging-
 http://www.360doc.com/content/15/0610/17/18578054_477193762.shtml
 https://www.wang1314.com/doc/topic-1259214-1.html
 
+https://blog.csdn.net/kimylrong/article/details/43525333
+
 1、产生CA的key和证书文件
-openssl req -new -x509 -days 36500 -extensions v3_ca -keyout ca.key -out ca.crt -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.128.147.16" -passout pass:Pass1qaz
+openssl req -new -x509 -days 36500 -extensions v3_ca -keyout ca.key -out ca.crt -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.128.147.16" -passout pass:changeit
 备注：
 req 命令表示创建证书
 new 参数表示创建私钥而不是从已存在的文件中读取
@@ -14,12 +16,12 @@ new 参数表示创建私钥而不是从已存在的文件中读取
 openssl genrsa -out server.key 2048 # -passout pass:Pass1q2w
 
 3、生成服务端的证书请求文件server.csr
-openssl req -out server.csr -key server.key -new -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.135.78.54"
+openssl req -out server.csr -key server.key -new -subj "/C=CN/ST=SH/L=SHANGHAI/O=smtc/OU=saicmotor/CN=10.135.78.20"
 
 4、生成服务端证书
 将第一步生成的ca证书拷贝过来
 echo "Pass1234" | scp maxus@10.128.147.16:/home/maxus/ssltest/ca.* .
-openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 36500 -passin pass:Pass1qaz
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 36500 -passin pass:changeit
 
 5、生成客户端密钥文件
 openssl genrsa -out client.key 2048 # -passout pass:Pass1234
@@ -30,12 +32,15 @@ openssl req -out client.csr -key client.key -new -subj "/C=CN/ST=SH/L=SHANGHAI/O
 7、生成客户端证书
 将第一步生成的ca证书拷贝过来
 echo "Pass1234" | scp maxus@10.128.147.16:/home/maxus/ssltest/ca.* .
-openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -days 36500 -passin pass:Pass1qaz
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -days 36500 -passin pass:changeit
 
 8、转化为pem格式和der格式
 由于java 端不支持client.key的格式，需要命令进行转化
 openssl pkcs8 -topk8 -in client.key -out client.pem -nocrypt
 openssl pkcs8 -topk8 -inform PEM -outform DER -in client.key -out client.der -nocrypt
+
+9、将私钥、证书合并为一个pem文件：
+cat server.key server.crt | tee server-allinone.pem
 
 ----------------------------单个代理配置-------------------------------------------------
 sudo vi /etc/mosquitto/mosqquitto.conf

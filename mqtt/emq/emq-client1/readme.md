@@ -7,6 +7,9 @@ https://blog.csdn.net/yezis/article/details/43644117
 https://blog.toright.com/posts/4024/haproxy-%E6%95%B4%E5%90%88-ssltls-client-certificate-%E6%95%99%E5%AD%B8.html
 https://blog.csdn.net/chengfei112233/article/details/78983026
 http://www.cnblogs.com/lexiaofei/p/8398065.html
+https://blog.csdn.net/chenyefei/article/details/52587659
+https://www.jb51.net/article/121491.htm
+https://stackoverflow.com/questions/41186024/spring-boot-mqtt-configuration
 
 [error] Server access Error: sun.security.validator.ValidatorException:
 PKIX path building failed:sun.security.provider.certpath.SunCertPathBuilderException:unable to find valid certification path to requested target
