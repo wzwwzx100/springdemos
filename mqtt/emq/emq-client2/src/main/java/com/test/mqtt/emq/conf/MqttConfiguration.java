@@ -2,8 +2,8 @@ package com.test.mqtt.emq.conf;
 
 import java.util.Properties;
 
-import javax.net.ssl.SSLSocketFactory;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +27,11 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.annotation.Header;
 
-import com.test.mqtt.emq.util.SslUtil;
-
 @Configuration
 @EnableConfigurationProperties(MqttProperties.class)
 public class MqttConfiguration {
+	
+	private static Logger logger = LogManager.getLogger(MqttConfiguration.class);
 
 	@Autowired
 	private MqttProperties mqttProperties;
@@ -63,13 +63,9 @@ public class MqttConfiguration {
 			@Override
 			public void handleMessage(Message<?> message) throws MessagingException {
 				MessageHeaders headers = message.getHeaders();
+				headers.forEach((x,y) ->logger.info("header::: " + x + ":" + headers.get(y)));
 				String topic = (String) headers.get("mqtt_receivedTopic");
-				System.out.println("listen topic: " + topic + ", payload: " + message.getPayload());
-//				long i = System.currentTimeMillis() % 3;
-//				String replyTopic = "client/tbox/sn" + i + "/aa";
-//				String msg = "This is a response: " + message.getPayload();
-//				System.out.println("reply topic::: " + replyTopic + ", reply message: " + msg);
-//				myGateway.sendToMqtt(msg, replyTopic);
+				logger.info("listen topic: " + topic + ", payload: " + message.getPayload());
 			}
 		};
 	}
